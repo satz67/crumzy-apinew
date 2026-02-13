@@ -1,41 +1,35 @@
 export default async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Credentials', true);
+    // 1. Headers to allow Framer to connect
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
         const { prompt } = req.body;
-        const topic = prompt || "Viral Content";
+        // If the user didn't type anything, use "Viral Content"
+        const topic = prompt && prompt.trim() !== "" ? prompt : "Viral Content";
 
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                model: "gpt-4o-mini",
-                messages: [
-                    { 
-                        role: "system", 
-                        content: `You are a viral hook expert. It is currently ${new Date().toISOString()}. Never repeat the same hook twice. Be creative and edgy.` 
-                    },
-                    { role: "user", content: `Generate a unique viral hook for: ${topic}` }
-                ],
-                temperature: 0.9, // Higher = more creative/random
-                presence_penalty: 0.6, // Discourages repeating topics
-            }),
-        });
+        // 2. The "Pseudo-AI" List
+        const hooks = [
+            `Stop scrolling! Here is the secret to ${topic}.`,
+            `I tried ${topic} for 30 days and this happened...`,
+            `3 mistakes you are making with ${topic} right now.`,
+            `The ${topic} hack that feels illegal to know.`,
+            `Why nobody is telling you the truth about ${topic}.`,
+            `This is exactly how I mastered ${topic} in 24 hours.`,
+            `The only ${topic} guide you will ever need.`,
+            `POV: You just discovered the best way to do ${topic}.`
+        ];
 
-        const data = await response.json();
-        const aiHook = data.choices?.[0]?.message?.content?.trim();
+        // 3. Pick one at random
+        const randomHook = hooks[Math.floor(Math.random() * hooks.length)];
 
-        return res.status(200).json({ name: aiHook || "Try again for a fresh hook!" });
+        // 4. Send it back to Framer in the 'name' field
+        return res.status(200).json({ name: randomHook });
 
     } catch (error) {
-        return res.status(200).json({ name: "AI is refreshing... click again!" });
+        return res.status(200).json({ name: "Oops! Try clicking again." });
     }
 }
