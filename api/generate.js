@@ -1,19 +1,41 @@
-export default async function handler(req, res) {
-    // These 4 lines are MANDATORY to stop the Connection Error
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Content-Type');
+import { Data, Override } from "framer"
 
-    if (req.method === 'OPTIONS') return res.status(200).end();
+const data = Data({
+    hookResult: "Your viral hooks will appear here...",
+    userPrompt: "",
+})
 
-    try {
-        const { prompt } = req.body;
-        // This is what Framer is looking for
-        return res.status(200).json({ 
-            name: `Success! I see your prompt: ${prompt || "Empty"}` 
-        });
-    } catch (err) {
-        return res.status(200).json({ name: "Server connected!" });
+export function GetInput(): Override {
+    return {
+        onValueChange: (value) => {
+            data.userPrompt = value
+        },
+    }
+}
+
+export function GetHookButton(): Override {
+    return {
+        onTap: async () => {
+            console.log("Button Clicked!") // Check this in your browser console
+            data.hookResult = "Wait... calling Vercel..."
+            
+            try {
+                const response = await fetch("https://crumzy-apinew.vercel.app/api/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: data.userPrompt }),
+                })
+                const result = await response.json()
+                data.hookResult = result.name // This updates the text layer
+            } catch (error) {
+                data.hookResult = "Connection failed."
+            }
+        },
+    }
+}
+
+export function DisplayHook(): Override {
+    return {
+        text: data.hookResult, // This is what forces the screen to change
     }
 }
