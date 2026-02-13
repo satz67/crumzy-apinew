@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-    // 1. Headers to allow Framer to connect
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -8,28 +7,38 @@ export default async function handler(req, res) {
 
     try {
         const { prompt } = req.body;
-        // If the user didn't type anything, use "Viral Content"
         const topic = prompt && prompt.trim() !== "" ? prompt : "Viral Content";
 
-        // 2. The "Pseudo-AI" List
         const hooks = [
-            `Stop scrolling! Here is the secret to ${topic}.`,
-            `I tried ${topic} for 30 days and this happened...`,
-            `3 mistakes you are making with ${topic} right now.`,
-            `The ${topic} hack that feels illegal to know.`,
-            `Why nobody is telling you the truth about ${topic}.`,
-            `This is exactly how I mastered ${topic} in 24 hours.`,
-            `The only ${topic} guide you will ever need.`,
-            `POV: You just discovered the best way to do ${topic}.`
+            // The "Mistake" Style
+            `Stop doing ${topic} the old way. You're losing followers.`,
+            `3 ${topic} mistakes that are killing your growth.`,
+            `I bet you didn't know this ${topic} hack...`,
+            
+            // The "Secret/Success" Style
+            `How I mastered ${topic} in just 7 days (Step-by-step).`,
+            `The secret ${topic} tool the pros don't want you to find.`,
+            `This ${topic} strategy feels like a cheat code.`,
+            
+            // The "POV/Relatable" Style
+            `POV: You finally figured out the ${topic} algorithm.`,
+            `That moment when ${topic} actually starts working for you.`,
+            `Is it just me, or is ${topic} getting harder every day?`,
+            
+            // The "Challenge" Style
+            `I challenge you to try this ${topic} routine for 24 hours.`,
+            `The $0 way to start ${topic} from scratch in 2026.`,
+            `Can we talk about how ${topic} is changing the game?`
         ];
 
-        // 3. Pick one at random
         const randomHook = hooks[Math.floor(Math.random() * hooks.length)];
 
-        // 4. Send it back to Framer in the 'name' field
+        // Log the success for your Vercel dashboard
+        console.log(`Generated hook for topic: ${topic}`);
+
         return res.status(200).json({ name: randomHook });
 
     } catch (error) {
-        return res.status(200).json({ name: "Oops! Try clicking again." });
+        return res.status(200).json({ name: "Connection stable! Click again." });
     }
 }
